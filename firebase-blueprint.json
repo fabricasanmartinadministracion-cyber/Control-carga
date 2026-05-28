@@ -1,0 +1,55 @@
+{
+  "entities": {
+    "Planilla": {
+      "title": "Planilla",
+      "description": "Sheet parsed from the uploaded Excel file with historical layout and general stock data per shop",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "nombre": { "type": "string" },
+        "fechaExcel": { "type": "string" },
+        "fechaCreacion": { "type": "string", "format": "date-time" },
+        "creadoPor": { "type": "string" },
+        "creadoPorEmail": { "type": "string" },
+        "archivoNombre": { "type": "string" },
+        "locales": { "type": "array" },
+        "productos": { "type": "object" },
+        "saboresCategorizados": { "type": "object" }
+      },
+      "required": ["nombre", "fechaExcel", "fechaCreacion", "creadoPor", "locales", "productos"]
+    },
+    "Despacho": {
+      "title": "Despacho",
+      "description": "Calculated route despacho load sheet containing selected shops, computed wagon distribution, and printer settings",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "planillaId": { "type": "string" },
+        "nombreDespacho": { "type": "string" },
+        "fechaExcel": { "type": "string" },
+        "fechaCreacion": { "type": "string", "format": "date-time" },
+        "creadoPor": { "type": "string" },
+        "creadoPorEmail": { "type": "string" },
+        "localesSeleccionados": { "type": "array" },
+        "empanadas": { "type": "object" },
+        "pastelitos": { "type": "object" },
+        "pizzas": { "type": "object" },
+        "carrosExclusivos": { "type": "array" },
+        "carrosCompartidos": { "type": "array" },
+        "totales": { "type": "object" },
+        "margenesConfig": { "type": "object" }
+      },
+      "required": ["planillaId", "nombreDespacho", "fechaCreacion", "creadoPor", "creadoPorEmail", "localesSeleccionados", "totales"]
+    }
+  },
+  "firestore": {
+    "/planillas/{planillaId}": {
+      "schema": "Planilla",
+      "description": "Collection of uploaded excel spreadsheets"
+    },
+    "/despachos/{despachoId}": {
+      "schema": "Despacho",
+      "description": "Collection of calculated wagon distributions and route load sheets"
+    }
+  }
+}

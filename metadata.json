@@ -1,0 +1,6 @@
+{
+  "name": "Logística y Despacho",
+  "description": "Panel centralizado de logística, cálculo de estiba de carros en tiempo real y reportes exportables para jefes de despacho.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

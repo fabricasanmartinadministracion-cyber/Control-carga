@@ -1,0 +1,78 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+/* Variables dinámicas para el control de márgenes y tamaño de hoja */
+:root {
+  --margin-top: 15mm;
+  --margin-bottom: 15mm;
+  --margin-left: 15mm;
+  --margin-right: 15mm;
+  --print-scale: 95%;
+}
+
+/* Simulación de hojas físicas A4 en pantalla (Modo Vista Previa) */
+.modo-vista-previa-activo .pantalla-imprimible-hoja {
+  background: white !important;
+  width: 210mm !important;
+  min-height: 297mm !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.15) !important;
+  border: 1px solid #cbd5e1 !important;
+  margin: 0 auto 24px auto !important; /* Separación visual entre hojas en pantalla */
+  transition: all 0.2s ease;
+}
+
+/* Inyección dinámica de márgenes a las hojas */
+.pantalla-imprimible-contenedor {
+  padding-top: var(--margin-top) !important;
+  padding-bottom: var(--margin-bottom) !important;
+  padding-left: var(--margin-left) !important;
+  padding-right: var(--margin-right) !important;
+}
+
+.escalable-text {
+  font-size: var(--print-scale) !important;
+}
+
+/* ========================================== */
+/* REGLAS ESTRICTAS DE IMPRESIÓN REAL (PAPEL O PDF) */
+/* ========================================== */
+@media print {
+  .no-imprimir {
+    display: none !important;
+  }
+  
+  body {
+    background-color: #fff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  
+  .pantalla-imprimible-hoja {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: white !important;
+  }
+  
+  /* FORZADO DE SALTO DE PÁGINA REQUERIDO */
+  .salto-pagina {
+    page-break-before: always !important;
+    break-before: page !important;
+  }
+  
+  @page {
+    size: A4 portrait;
+    margin-top: var(--margin-top);
+    margin-bottom: var(--margin-bottom);
+    margin-left: var(--margin-left);
+    margin-right: var(--margin-right);
+  }
+}

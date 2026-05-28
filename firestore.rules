@@ -1,0 +1,83 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Safety Net default-deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Common Helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Planilla Entity Validator
+    function isValidPlanilla(data) {
+      return data.keys().hasAll(['id', 'nombre', 'fechaExcel', 'fechaCreacion', 'creadoPor', 'creadoPorEmail', 'archivoNombre', 'locales', 'productos', 'saboresCategorizados'])
+        && data.keys().size() == 10
+        && data.id is string && data.id.size() <= 128
+        && data.nombre is string && data.nombre.size() <= 256
+        && data.fechaExcel is string && data.fechaExcel.size() <= 128
+        && data.creadoPor == request.auth.uid
+        && data.creadoPorEmail is string && data.creadoPorEmail.size() <= 256
+        && data.archivoNombre is string && data.archivoNombre.size() <= 512
+        && data.locales is list
+        && data.productos is map
+        && data.saboresCategorizados is map;
+    }
+
+    // Despacho Entity Validator
+    function isValidDespacho(data) {
+      return data.keys().hasAll(['id', 'planillaId', 'nombreDespacho', 'fechaExcel', 'fechaCreacion', 'creadoPor', 'creadoPorEmail', 'localesSeleccionados', 'empanadas', 'pastelitos', 'pizzas', 'carrosExclusivos', 'carrosCompartidos', 'totales', 'margenesConfig'])
+        && data.keys().size() == 15
+        && data.id is string && data.id.size() <= 128
+        && data.planillaId is string && data.planillaId.size() <= 128
+        && data.nombreDespacho is string && data.nombreDespacho.size() <= 256
+        && data.fechaExcel is string && data.fechaExcel.size() <= 128
+        && data.creadoPor == request.auth.uid
+        && data.creadoPorEmail is string && data.creadoPorEmail.size() <= 256
+        && data.localesSeleccionados is list
+        && data.empanadas is map
+        && data.pastelitos is map
+        && data.pizzas is map
+        && data.carrosExclusivos is list
+        && data.carrosCompartidos is list
+        && data.totales is map
+        && data.margenesConfig is map;
+    }
+
+    // Rules for Planilla
+    match /planillas/{planillaId} {
+      allow get, list: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(planillaId) && isValidPlanilla(incoming());
+      allow update: if false; // Planillas are immutable once uploaded for solid audits
+      allow delete: if isSignedIn() && existing().creadoPor == request.auth.uid;
+    }
+
+    // Rules for Despacho
+    match /despachos/{despachoId} {
+      allow get, list: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(despachoId) && isValidDespacho(incoming());
+      // Deletion and modifications allowed solely to creator
+      allow update: if isSignedIn() && existing().creadoPor == request.auth.uid && isValidDespacho(incoming()) && (
+        incoming().planillaId == existing().planillaId &&
+        incoming().creadoPor == existing().creadoPor
+      );
+      allow delete: if isSignedIn() && existing().creadoPor == request.auth.uid;
+    }
+
+  }
+}
